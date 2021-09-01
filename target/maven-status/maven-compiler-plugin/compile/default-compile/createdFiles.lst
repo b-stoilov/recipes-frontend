@@ -1,0 +1,7 @@
+com\example\recipes_frontend\modelUI\Recipe.class
+AppWidgetset.class
+com\example\recipes_frontend\MainView.class
+com\example\recipes_frontend\StartView.class
+com\example\recipes_frontend\AllRecipesView.class
+com\example\recipes_frontend\HomeeView.class
+com\example\recipes_frontend\MainView$ButtonListener.class

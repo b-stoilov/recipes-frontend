@@ -20,20 +20,18 @@ public class RecipeStep {
 	
 	private String name;
 	
-	private EquipmentUsage equipmentUsage;
+	private String temporaryEquipmentName;
 	
-	private Set<ProductUsage> usedProducts;
-	
-	RecipeStepId recipeStepId;
+	List<String> tempProductNames;
 	
 	public RecipeStep () {}
 		
 	
-	public RecipeStep(Recipe recipe, String name, EquipmentUsage equipmentUsage) {
+	public RecipeStep(Recipe recipe, String name, EquipmentUsage equipmentUsage, List<ProductUsage> usedProducts) {
 		this.id = recipe;
 		this.name = name;
 		this.equipmentUsage = equipmentUsage;
-//			this.productUsages = productUsages;
+		this.usedProducts = usedProducts;
 	}
 		
 		
@@ -42,6 +40,64 @@ public class RecipeStep {
 		this.name = name;
 		this.eqUsId = eqUsId;
 		this.prodUsIds = prodUsIds;
+	}
+	
+	public RecipeStep(long tempId, long eqUsId, String name) {
+		this.tempId = tempId;
+		this.name = name;
+		this.eqUsId = eqUsId;
+	}
+	
+	public RecipeStep(String tempEqName, String name, List<String> tempProdNames) {
+		this.temporaryEquipmentName = tempEqName;
+		this.name = name;
+		this.tempProductNames = tempProdNames;
+	}
+	
+	public List<String> getTempProductNames() {
+		return tempProductNames;
+	}
+
+
+	public void setTempProductNames(List<String> tempProductNames) {
+		this.tempProductNames = tempProductNames;
+	}
+
+	private EquipmentUsage equipmentUsage;
+	
+	private List<ProductUsage> usedProducts;
+	
+	public List<ProductUsage> getUsedProducts() {
+		return usedProducts;
+	}
+
+
+	public void setUsedProducts(List<ProductUsage> usedProducts) {
+		this.usedProducts = usedProducts;
+	}
+
+	RecipeStepId recipeStepId;
+	
+	
+	
+	public String getTemporaryEquipmentName() {
+		return temporaryEquipmentName;
+	}
+
+
+	public void setTemporaryEquipmentName(String temporaryEquipmentName) {
+		this.temporaryEquipmentName = temporaryEquipmentName;
+	}
+
+	
+	public void setTempId(long tempId) {
+		this.tempId = tempId;
+	}
+
+
+	public RecipeStep(long eqUsId, String name) {
+		this.name = name;
+		this.eqUsId = eqUsId;
 	}
 	
 	public RecipeStepId getRecipeStepId() {

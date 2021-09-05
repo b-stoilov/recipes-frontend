@@ -32,10 +32,18 @@ public class EquipmentUsage {
 		this.equipment = equipment;
 		this.recipeIdd = recipeIdd;
 	}
+	
+	public EquipmentUsage(Equipment equipment) {
+		this.equipment = equipment;
+	}
 
 
 	public long getId () {
 		return id;
+	}
+	
+	public void setId (long id) {
+		this.id = id;
 	}
 	
 	

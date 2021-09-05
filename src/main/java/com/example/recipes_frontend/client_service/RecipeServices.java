@@ -182,13 +182,21 @@ public class RecipeServices {
 	public Response addRecipe(Recipe recipe) {
 		init();
 		Response response = null;
+		String responseString = null;
+		Recipe altRecipe = null;
 		
 		try {
 			response = target
 				.path("recipes")
 				.request(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(recipe, MediaType.APPLICATION_JSON));
+			
+			responseString = response.readEntity(String.class);
 		
+			altRecipe = mapper.readValue(responseString, Recipe.class);
+			
+			recipe.setId(altRecipe.getId());
+			
 		} catch (Exception e) {
 			System.out.println(e);
 		}
@@ -201,12 +209,15 @@ public class RecipeServices {
 		init();
 		
 		Response response = null;
+		String responseString = null;
 		
 		try {
 			response = target
 				.path("equipment-usage")
 				.request(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(eqUsage, MediaType.APPLICATION_JSON));
+			
+			responseString = response.readEntity(String.class);
 			
 		} catch (Exception e) {
 			System.out.println(e);
@@ -219,12 +230,15 @@ public class RecipeServices {
 		init();
 		
 		Response response = null; 
+		String responseString = null;
 	
 		try {
 			response = target
-				.path("equipment-usage")
+				.path("product-usage")
 				.request(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(prodUsage, MediaType.APPLICATION_JSON));
+			
+			responseString = response.readEntity(String.class);
 			
 		} catch (Exception e) {
 			System.out.println(e);
@@ -232,6 +246,26 @@ public class RecipeServices {
 		
 		return response;
 	
+	}
+	
+	public Response addRecipeStep (RecipeStep recipeStep) {
+		init();
+		
+		Response response = null; 
+		String responseString = null;
+		try {
+			response = target
+				.path("recipe-step")
+				.request(MediaType.APPLICATION_JSON)
+				.post(Entity.entity(recipeStep, MediaType.APPLICATION_JSON));
+			
+			responseString = response.readEntity(String.class);
+			
+		} catch (Exception e) {
+			System.out.println(e);
+		}
+		
+ 		return response;
 	}
 	
 

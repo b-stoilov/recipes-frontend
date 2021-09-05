@@ -55,14 +55,33 @@ import com.vaadin.ui.VerticalLayout;
 				List<EquipmentUsage> eqUsages = null;
 				List<ProductUsage> prodUsages = null;
 				
+				
+				
 				try {
 					recipeSteps = rs.getRecipeStepsByRecipeId(recipe.getId());
+					
+				} catch (Exception e) {
+					System.out.println("No recipe steps");
+				}
+				
+				try {
 					eqUsages = rs.getEqUsagesPerRecipe(recipe.getId());
+					
+					
+				} catch (Exception e) {
+					System.out.println("No equipment usages");
+				}
+				
+				try {
 					prodUsages = rs.getProdusagesPerRecipe(recipe.getId());
 					
 				} catch (Exception e) {
-				
+					System.out.println("No product usages");
 				}
+				
+				
+				
+				
 				
 	            if (event.getValue() == null) {
 	                recipeView.setVisible(false);
@@ -124,6 +143,17 @@ import com.vaadin.ui.VerticalLayout;
             		Label lblEquipmentPerStep = new Label(usedEquipment);
             		
             		vl_eq_per_step.addComponents(lblEquipmentPerStepTitle, lblEquipmentPerStep);
+            	}
+            	
+            	if (!recipeStep.getUsedProducts().isEmpty()) {
+            		Label lblProductUsage = new Label("Needed products: ");
+            		
+            		vl_prod_per_step.addComponent(lblProductUsage);
+            		
+            		for (ProductUsage prodUsage : recipeStep.getUsedProducts()) {
+            			Label lblProdPerStep = new Label(prodUsage.getProduct().getName());
+            			vl_prod_per_step.addComponent(lblProdPerStep);
+            		}
             	}
             	
             	

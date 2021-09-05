@@ -14,7 +14,13 @@ public class Equipment {
 		
 	}
 
+	public Equipment(long id, String equipmntName) {
+		this.id = id;
+		this.name = equipmntName;
+	}
+	
 	public Equipment(String equipmntName) {
+	
 		this.name = equipmntName;
 	}
 

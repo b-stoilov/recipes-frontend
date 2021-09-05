@@ -11,6 +11,8 @@ import com.example.recipes_frontend.modelUI.EquipmentUsage;
 import com.example.recipes_frontend.modelUI.Product;
 import com.example.recipes_frontend.modelUI.ProductUsage;
 import com.example.recipes_frontend.modelUI.Recipe;
+import com.example.recipes_frontend.modelUI.RecipeStep;
+import com.example.recipes_frontend.modelUI.Uom;
 import com.vaadin.annotations.DesignRoot;
 import com.vaadin.data.Binder;
 import com.vaadin.data.provider.ListDataProvider;
@@ -31,6 +33,7 @@ class AddRecipeView extends VerticalLayout {
 	
 	private RecipeService recipesDB = RecipeService.getInstance();
 	private Recipe recipe;
+	List<EquipmentUsage> eqUsages;
 	private Binder<Recipe> binder = new Binder<>(Recipe.class);
 	
 	private HorizontalLayout hl_all = new HorizontalLayout(); 
@@ -61,6 +64,14 @@ class AddRecipeView extends VerticalLayout {
 	
 	List<String> equipmentUsed = new ArrayList<>();
 	ListDataProvider<String> dpEquipmentUsed = new ListDataProvider<>(equipmentUsed);
+	List<EquipmentUsage> usageEquipment = new ArrayList<>();
+	
+	List<Double> quantityProduct = new ArrayList<>();
+	List<String> uomProduct = new ArrayList<>();
+	List<ProductUsage> usagesProducts = new ArrayList<>();
+	List<String> usedProductsNames = new ArrayList<>();
+	
+	List<RecipeStep> recipeSteps = new ArrayList<>();
 	
 	int stepCounter = 1;
 	
@@ -122,6 +133,9 @@ class AddRecipeView extends VerticalLayout {
 	
 	
 	private VerticalLayout addStep () {
+//		String productValue;
+		RecipeStep recipeStep = new RecipeStep();
+		
 		VerticalLayout vl_step = new VerticalLayout();
 		
 		HorizontalLayout hl_tf_nsp_nse = new HorizontalLayout();
@@ -135,27 +149,37 @@ class AddRecipeView extends VerticalLayout {
 		
 		TextField tfStepName = new TextField();
 		Label lblStepCounter = new Label(String.valueOf(stepCounter));
+		Button btnSumbit = new Button("Yes");
 		
 		nsProducts.setDataProvider(dpProductsUsed);
 		nsEquipment.setDataProvider(dpEquipmentUsed);
 		
 		
 		hl_tf_nsp_nse.addComponents(lblStepCounter, tfStepName,
-				nsProducts, nsEquipment);
+				nsProducts, nsEquipment, btnSumbit);
 		
 		
 		vl_prs_per_step.addComponent(new Label("Products used:"));	
 		
 		nsProducts.addSelectionListener(valueChange -> {
 			if (valueChange.getValue() != null || !valueChange.getValue().isEmpty()) {
-				vl_prs_per_step.addComponent(new Label((String) valueChange.getValue()));
+				String productValueChange = valueChange.getValue(); 
+				vl_prs_per_step.addComponent(new Label(productValueChange));
+				usedProductsNames.add(productValueChange);
 			}
 			
 		});
 		
+		
+		
 		nsEquipment.addSelectionListener(valueChange -> {
 			if (valueChange.getValue() != null || !valueChange.getValue().isEmpty()) {
-				vl_eq_per_step.addComponent(new Label((String) valueChange.getValue()));
+				String equipmentValueChange = valueChange.getValue();
+				vl_eq_per_step.addComponent(new Label(equipmentValueChange));
+//				recipeStep.setEqUsId(findEquipmentUsageIdByName(equipmentValueChange));
+				recipeStep.setTemporaryEquipmentName(equipmentValueChange);
+				
+				
 			}
 		});
 		
@@ -165,10 +189,20 @@ class AddRecipeView extends VerticalLayout {
 		
 		vl_step.addComponents(hl_tf_nsp_nse, hl_prs_eq_per_step);
 		
+		btnSumbit.addClickListener(click -> {
+			recipeStep.setName(tfStepName.getValue());
+			recipeStep.setTempProductNames(usedProductsNames);
+			
+			recipeSteps.add(recipeStep);
+			
+			vl_step.addComponent(new Label("Step added"));
+			
+		});
+		
+		
 		return vl_step;
 	}
-
-
+	
 
 	private void addButtonsUI() {
 		btnSave = new Button("Save");
@@ -216,6 +250,7 @@ class AddRecipeView extends VerticalLayout {
 			if (tfEqName.getValue()  != null || !tfEqName.isEmpty()) {
 				equipmentUsed.add(tfEqName.getValue());
 				dpEquipmentUsed.refreshAll();
+				usageEquipment.add(new EquipmentUsage(new Equipment(tfEqName.getValue())));
 			}
 		});
 		
@@ -248,6 +283,9 @@ class AddRecipeView extends VerticalLayout {
 		btnSubmitProduct.addClickListener(click -> {
 			if (tfAddProduct.getValue() != null || !tfAddProduct.isEmpty()) {
 				productsUsed.add(tfAddProduct.getValue());
+				usagesProducts.add(new ProductUsage( new Product(tfAddProduct.getValue()),
+													Double.valueOf(tfAddProductQuantity.getValue()) ,
+													new Uom(tfAddUOM.getValue()) ) );
 				dpProductsUsed.refreshAll();
 			}			
 		});
@@ -283,53 +321,82 @@ class AddRecipeView extends VerticalLayout {
 	
 	
 	public List<EquipmentUsage> addEquipmentUsages (long id) {
-		List<EquipmentUsage> eqUsages = new ArrayList<>();
 		
-		for (String eqUsage : equipmentUsed) {
-			
-			
-			EquipmentUsage eUsage = new EquipmentUsage();
-			
-		
-			eUsage.setEquipment(new Equipment(eqUsage));
-			eUsage.setRecipeIdd(id);
-			
-			eqUsages.add(eUsage);
+		for (EquipmentUsage eqUsage : usageEquipment) {
+			eqUsage.setRecipeIdd(id);		
 		}
 		 
-		return eqUsages;
+		return usageEquipment;
 	}
 	
 	public List<ProductUsage> addProductUsages (long id) {
-		List<ProductUsage> prodUsages = new ArrayList<>();
 		
-		for (String productUsed : productsUsed) {
-			ProductUsage prodUsage = new ProductUsage();
-			
-			prodUsage.setProduct(new Product(productUsed));
-			prodUsage.setRecipeIdd(id);
-		
-			prodUsages.add(prodUsage);
+		for (ProductUsage productUsed : usagesProducts) {
+			productUsed.setRecipeIdd(id);			
 		}
 		
-		return prodUsages;
+		return usagesProducts;
 		
 	}
+	
+	public List<RecipeStep> addRecipeStep (long id, List<EquipmentUsage> eqUsgs, List<ProductUsage> prodUsages) {
+		List<RecipeStep> wantedRecipeSteps = new ArrayList<>();
+		for (RecipeStep recipeStep : recipeSteps) {
+			RecipeStep altRecipeStep = new RecipeStep();
+			altRecipeStep.setTempId(id);
+			altRecipeStep.setName(recipeStep.getName());
+			altRecipeStep.setEqUsId(findEquipmentUsageIdByName(recipeStep.getTemporaryEquipmentName(), eqUsgs));
+			altRecipeStep.setProdUsIds(findUsedProductsIds(recipeStep.getTempProductNames(), prodUsages));
+
+			wantedRecipeSteps.add(altRecipeStep);
+			
+		}
+		
+		return wantedRecipeSteps;
+	}
+	
+	private Long findEquipmentUsageIdByName(String name, List<EquipmentUsage> eqUsgs) {
+		Long id = (long) 1;
+		
+		
+		for (EquipmentUsage eSage : eqUsgs) {
+			if(eSage.getEquipment().getEquipmntName().equals(name)) {
+				id = eSage.getId();
+			}
+		}
+		
+		return id;
+	}
+	
+	private List<Long> findUsedProductsIds (List<String> names, List<ProductUsage> prodUsages) {
+		List<Long> ids = new ArrayList<>();
+		
+		for (String name : names) {
+			for (ProductUsage prodUsage : prodUsages) {
+				if (name.equals(prodUsage.getProduct().getName())) {
+					ids.add(prodUsage.getId());
+				}
+			}
+		}
+		
+		return ids;
+	}
+
+	
+	
 	
 	
 	public void save () {
 		Recipe recipee = addRecipe();
 		
+
+  		recipeServices.addRecipe(recipee);
 		
-		
-		recipesDB.save(recipe);
-		
-		recipeServices.addRecipe(recipee);
-		
-		List<EquipmentUsage> eqUsages = addEquipmentUsages(recipee.getId());
+		List<EquipmentUsage> eqqUsage = addEquipmentUsages(recipee.getId());
 		List<ProductUsage> prodUsages = addProductUsages(recipee.getId());
 		
-		for (EquipmentUsage eqUsage : eqUsages) {
+		
+		for (EquipmentUsage eqUsage : eqqUsage) {
 			recipeServices.addEquipmentUsage(eqUsage);
 		}
 		
@@ -338,6 +405,15 @@ class AddRecipeView extends VerticalLayout {
 			recipeServices.addProductUsage(prodUsage);
 		}
 		
+		List<EquipmentUsage> equipmentUsages = recipeServices.getEqUsagesPerRecipe(recipee.getId());
+		List<ProductUsage> productUsages = recipeServices.getProdusagesPerRecipe(recipee.getId());
+		List<RecipeStep> recipeStepss = addRecipeStep(recipee.getId(), equipmentUsages, productUsages);
+		
+		for (RecipeStep recipeStep : recipeStepss) {
+			recipeServices.addRecipeStep(recipeStep);
+		}
+		
+		List<RecipeStep> recippeeeSteps = recipeServices.getRecipeStepsByRecipeId(recipee.getId());
 		
 		this.addComponent(new Label("Recipe successfully added!"));
 	}

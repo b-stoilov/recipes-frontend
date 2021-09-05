@@ -33,6 +33,12 @@ public class ProductUsage {
 		this.productUOM = productUOM;
 		this.recipeIdd = recipeIdd;
 	}
+	
+	public ProductUsage(Product product, double productQuantity, Uom productUOM) {
+		this.product = product;
+		this.productQuantity = productQuantity;
+		this.productUOM = productUOM;
+	}
 
 	public long getId() {
 		return id;

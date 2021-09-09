@@ -18,6 +18,7 @@ import com.vaadin.data.Binder;
 import com.vaadin.data.provider.ListDataProvider;
 import com.vaadin.event.ShortcutAction.KeyCode;
 import com.vaadin.ui.Button;
+import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.NativeSelect;
@@ -74,6 +75,14 @@ class AddRecipeView extends VerticalLayout {
 	List<RecipeStep> recipeSteps = new ArrayList<>();
 	
 	int stepCounter = 1;
+	
+	private boolean emptyName = false;
+	private boolean emptyDesc = false;
+	private boolean emptyEqName = false;
+	private boolean emtyPrName = false;
+	private boolean emptyPrQuantity = false;
+	private boolean emptyPrUOM = false;
+	private boolean emptyStep = false;
 	
 	
 	RecipeServices recipeServices = new RecipeServices();
@@ -133,8 +142,9 @@ class AddRecipeView extends VerticalLayout {
 	
 	
 	private VerticalLayout addStep () {
-//		String productValue;
 		RecipeStep recipeStep = new RecipeStep();
+		
+		List<String> names = new ArrayList<>();
 		
 		VerticalLayout vl_step = new VerticalLayout();
 		
@@ -151,6 +161,8 @@ class AddRecipeView extends VerticalLayout {
 		Label lblStepCounter = new Label(String.valueOf(stepCounter));
 		Button btnSumbit = new Button("Yes");
 		
+		boolean emmptySteppp = false;
+		
 		nsProducts.setDataProvider(dpProductsUsed);
 		nsEquipment.setDataProvider(dpEquipmentUsed);
 		
@@ -165,7 +177,7 @@ class AddRecipeView extends VerticalLayout {
 			if (valueChange.getValue() != null || !valueChange.getValue().isEmpty()) {
 				String productValueChange = valueChange.getValue(); 
 				vl_prs_per_step.addComponent(new Label(productValueChange));
-				usedProductsNames.add(productValueChange);
+				names.add(productValueChange);
 			}
 			
 		});
@@ -189,13 +201,26 @@ class AddRecipeView extends VerticalLayout {
 		
 		vl_step.addComponents(hl_tf_nsp_nse, hl_prs_eq_per_step);
 		
+		btnSumbit.setEnabled(false);
+		
+		tfStepName.addValueChangeListener(value -> {
+			if (value.getValue().isEmpty()) {
+				btnSumbit.setEnabled(false);
+			} else {
+				btnSumbit.setEnabled(true);
+				emptyStep = true;
+			}
+		});
+	
 		btnSumbit.addClickListener(click -> {
 			recipeStep.setName(tfStepName.getValue());
-			recipeStep.setTempProductNames(usedProductsNames);
+			
+			recipeStep.setTempProductNames(names);
 			
 			recipeSteps.add(recipeStep);
 			
 			vl_step.addComponent(new Label("Step added"));
+			
 			
 		});
 		
@@ -206,6 +231,12 @@ class AddRecipeView extends VerticalLayout {
 
 	private void addButtonsUI() {
 		btnSave = new Button("Save");
+		
+//		btnSave.setEnabled(false);
+		
+		if (checkEmptyFields()) {
+			btnSave.setEnabled(true);
+		}
 		
 		btnCancel = new Button("Cancel");
 		
@@ -219,9 +250,21 @@ class AddRecipeView extends VerticalLayout {
 		
 		name = new TextField();
 		name.setCaption("Name your recipe:");
-	
+		
+//		name.addValueChangeListener(valueChange -> {
+//			if (!valueChange.getValue().isEmpty()) {
+//				emptyName = true;
+//			}
+//		});
+//	
 		desc = new TextField();
 		desc.setCaption("Describe your recipe:");
+		
+//		desc.addValueChangeListener(valueChange -> {
+//			if (!valueChange.getValue().isEmpty()) {
+//				emptyDesc = true;
+//			}
+//		});
 		
 		hl_name_desc.addComponents(name, desc);
 		
@@ -251,6 +294,20 @@ class AddRecipeView extends VerticalLayout {
 				equipmentUsed.add(tfEqName.getValue());
 				dpEquipmentUsed.refreshAll();
 				usageEquipment.add(new EquipmentUsage(new Equipment(tfEqName.getValue())));
+			}
+		});
+		
+		btnSubmit.setEnabled(false);
+		
+		tfEqName.addValueChangeListener(valueChange -> {
+			if (valueChange.getValue().isEmpty()) {
+				btnSubmit.setEnabled(false);
+			} else {
+				btnSubmit.setEnabled(true);
+				emptyEqName = true;
+				if (checkEmptyFields()) {
+					btnSave.setEnabled(true);
+				}
 			}
 		});
 		
@@ -294,6 +351,49 @@ class AddRecipeView extends VerticalLayout {
 
 		});
 		
+		btnSubmitProduct.setEnabled(false);
+		
+		tfAddProduct.addValueChangeListener(valueChange -> {
+			if (valueChange.getValue().isEmpty()) {
+				btnSubmitProduct.setEnabled(false);
+			} else {
+				btnSubmitProduct.setEnabled(true);
+				
+//				emtyPrName = true; 
+//				if (checkEmptyFields()) {
+//					btnSave.setEnabled(true);
+//				}
+			}
+		});
+		
+		tfAddProductQuantity.addValueChangeListener(valueChange -> {
+			if (valueChange.getValue().isEmpty()) {
+				btnSubmitProduct.setEnabled(false);
+			} else {
+				btnSubmitProduct.setEnabled(true);
+//				emptyPrQuantity = true;
+//				if (checkEmptyFields()) {
+//					btnSave.setEnabled(true);
+//				}
+				
+			}
+		});
+		
+		tfAddUOM.addValueChangeListener(valueChange -> {
+			if (valueChange.getValue().isEmpty()) {
+				btnSubmitProduct.setEnabled(false);
+			} else {
+				btnSubmitProduct.setEnabled(true);
+//				emptyPrUOM = true;
+//				if (checkEmptyFields()) {
+//					btnSave.setEnabled(true);
+//				}
+			}
+		});
+		
+		
+		
+		
 		tfAddProductQuantity.setWidth("75");
 		tfAddUOM.setWidth("75");
 		
@@ -301,6 +401,10 @@ class AddRecipeView extends VerticalLayout {
 				tfAddUOM, btnSubmitProduct, btnDeleteProduct);
 		
 		return hl_product_row;
+	}
+	
+	private boolean checkEmptyFields () {
+		return emptyDesc && emptyName && emptyEqName && emptyPrQuantity && emptyPrUOM && emtyPrName && emptyStep; 
 	}
 	
 
@@ -383,9 +487,6 @@ class AddRecipeView extends VerticalLayout {
 	}
 
 	
-	
-	
-	
 	public void save () {
 		Recipe recipee = addRecipe();
 		
@@ -413,8 +514,8 @@ class AddRecipeView extends VerticalLayout {
 			recipeServices.addRecipeStep(recipeStep);
 		}
 		
-		List<RecipeStep> recippeeeSteps = recipeServices.getRecipeStepsByRecipeId(recipee.getId());
 		
 		this.addComponent(new Label("Recipe successfully added!"));
+		
 	}
 }
